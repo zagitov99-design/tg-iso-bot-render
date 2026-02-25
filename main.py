@@ -449,6 +449,13 @@ async def on_startup():
   p = await get_pool()
   await p.execute(CREATE_SQL)
 
+  # --- simple migrations (safe if columns already exist) ---
+  await p.execute("ALTER TABLE users ADD COLUMN IF NOT EXISTS tz TEXT NOT NULL DEFAULT 'Europe/Berlin'")
+  await p.execute("ALTER TABLE users ADD COLUMN IF NOT EXISTS reminders_enabled BOOLEAN NOT NULL DEFAULT TRUE")
+  await p.execute("ALTER TABLE users ADD COLUMN IF NOT EXISTS remind1 TEXT NOT NULL DEFAULT '09:00'")
+  await p.execute("ALTER TABLE users ADD COLUMN IF NOT EXISTS remind2 TEXT NOT NULL DEFAULT '21:00'")
+  await p.execute("ALTER TABLE users ADD COLUMN IF NOT EXISTS created_at TIMESTAMP NOT NULL DEFAULT NOW()")
+
 async def main():
   await on_startup()
   scheduler.add_job(scheduler_tick, "interval", seconds=30)
